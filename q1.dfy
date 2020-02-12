@@ -1,45 +1,70 @@
-// Assignment 1
+// Assignment 1 - 5892
 // Question 1
-// Danielle Reid (201729019), Andrew Troake (201711165)
+// Authors: Danielle Reid (201729019), Andrew Troake (201711165)
 
-
-method swap(a:int, b:int)
-returns (c:int,d:int)
-    ensures c == b && d == a
+predicate Sorted( s : seq<int> )
 {
-    var temp := a;
-    a := b;
-    b := temp;
-    return a,b;
+    forall i,j : int :: 0 <= i <= j < |s| ==> s[i] <= s[j]
 }
 
-method bubblesort(a:array<int>, i:int)
-returns (a2:array<int>)
-    requires i > 0
-    ensures Sorted(a) && PermutationOf(a, a1)
+predicate PermutationOf( s : seq<int>, t : seq<int> )
+{
+    multiset(s) == multiset(t)
+}
+
+method swap( a : int, b : int ) returns ( c : int, d : int )
+    ensures c == b
+    ensures d == a
+{
+    c := b;
+    d := a;
+    return c, d;
+}
+
+method bubbleSort( a : array<int> )
+    modifies a
+    // ensures Sorted( a[..] )
+    // ensures PermutationOf( old(a[..]), a[..] )
+{
     var j := 0;
-    while j < i
+    var last := a.Length - j - 1;
 
+    while ( j < a.Length )
+        invariant 0 <= j <= a.Length
+        invariant Sorted( a[last..] )
+        // invariant PermutationOf( old(a[..]), a[..] )
+        decreases a.Length - j
     {
-        smallest := a(j);
-        var k := j+1;
-        while(k < i)
-            invariant j < i
-            invariant k > j
+        var k := 0;
+            
+        while ( k < j )
+            invariant 0 <= k <= j
+            decreases j - k
         {
-            if(a(k) < a(j)){
-                a(k),a(j) := swap(a(k), a(j));
+            if( a[k] > a[j] )
+            {
+                a[k], a[j] := swap(a[k], a[j]);
             }
-            k := k+1;
+                
+            k := k + 1;
         }
-        j := j+1;
+        
+        j := j + 1;
+        last := a.Length - j;
     }
-    return a;
 }
 
-method main(){
+method Main()
+{
+    // Test:
     var a := new int[5];
-    a[0],a[1],a[2],a[3],a[4] := 6,2,1,9,3;
-    a := bubblesort(a, 5);
-    print a;
+    a[0], a[1], a[2], a[3], a[4] := 6, 2, 1, 9, 3;
+    bubbleSort(a);
+
+    var i := 0;
+    while ( i < a.Length )
+    {
+        print a[i], "\t";
+        i := i + 1;
+    }
 }
